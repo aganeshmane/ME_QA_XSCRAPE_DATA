@@ -1,29 +1,47 @@
 package demo.wrappers;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Wrappers {
     /*
      * Write your selenium wrappers here
      */
-        WebDriver driver;
+    WebDriver driver;
 
     public Wrappers(WebDriver driver) {
         this.driver = driver;
     }
 
-    public void navigateToYouTube() {
+    public File convetArrayListIntoJsonFile(List<Map<String, Object>> teamData, String fileNAme) throws IOException {
+        try {
+            // Convert the ArrayList to JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonData = objectMapper.writeValueAsString(teamData);
+
+            // Write the JSON data to a file
+            File file = new File("output/'" + fileNAme + "'");
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write(jsonData);
+            fileWriter.close();
+            return file;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void navigateToScrape() {
         driver.get("https://www.scrapethissite.com/pages/");
     }
 

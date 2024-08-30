@@ -1,5 +1,4 @@
 package demo;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -13,12 +12,8 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,22 +39,16 @@ public class TestCases {
     @BeforeTest
     public void startBrowser() {
         System.setProperty("java.util.logging.config.file", "logging.properties");
-
         // NOT NEEDED FOR SELENIUM MANAGER
         // WebDriverManager.chromedriver().timeout(30).setup();
-
         ChromeOptions options = new ChromeOptions();
         LoggingPreferences logs = new LoggingPreferences();
-
         logs.enable(LogType.BROWSER, Level.ALL);
         logs.enable(LogType.DRIVER, Level.ALL);
         options.setCapability("goog:loggingPrefs", logs);
         options.addArguments("--remote-allow-origins=*");
-
         System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY, "build/chromedriver.log");
-
         driver = new ChromeDriver(options);
-
         driver.manage().window().maximize();
     }
 
@@ -67,7 +56,7 @@ public class TestCases {
     public void testCase01() throws InterruptedException, IOException {
         System.out.println("TestCase01:Started");
         Wrappers homePage = new Wrappers(driver);
-        homePage.navigateToYouTube();
+        homePage.navigateToScrape();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         WebElement hockeyPagination = wait.until(ExpectedConditions.presenceOfElementLocated(
                 By.xpath("//a[normalize-space()='Hockey Teams: Forms, Searching and Pagination']")));
@@ -109,19 +98,12 @@ public class TestCases {
             WebElement nextButton = driver
                     .findElement(By.xpath("//div[@class='row pagination-area']/div/ul/li/a[@aria-label='Next']"));
             homePage.clickOn(nextButton);
-            // Add a small delay to allow the page to load
+             // Add a small delay to allow the page to load
             Thread.sleep(2000);
 
         }
-        // Convert the ArrayList to JSON
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonData = objectMapper.writeValueAsString(teamData);
-
-        // Write the JSON data to a file
-        File file = new File("output/hockey-team-data.json");
-        FileWriter fileWriter = new FileWriter(file);
-        fileWriter.write(jsonData);
-        fileWriter.close();
+        // Convert the ArrayList to JSON and store it in a file
+        File file = homePage.convetArrayListIntoJsonFile(teamData, "hockey-team-data.json");
         // Assert that the file is present and not empty
         Assert.assertTrue(file.exists());
         Assert.assertTrue(file.length() > 0);
@@ -134,14 +116,13 @@ public class TestCases {
     public void testCase02() throws IOException, InterruptedException {
         System.out.println("TestCase02:Started");
         Wrappers homePage = new Wrappers(driver);
-        homePage.navigateToYouTube();
+        homePage.navigateToScrape();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         WebElement oskarPagination = wait.until(ExpectedConditions.presenceOfElementLocated(
                 By.xpath("//a[normalize-space()='Oscar Winning Films: AJAX and Javascript']")));
         homePage.clickOn(oskarPagination);
         Thread.sleep(2000);
 
-        ObjectMapper objectMapper = new ObjectMapper();
         List<Map<String, Object>> oscarData = new ArrayList<>();
 
         // Get the list of years
@@ -174,26 +155,18 @@ public class TestCases {
                 movieData.put("Awards", awards);
                 movieData.put("isWinner", isWinner);
                 oscarData.add(movieData);
-                Thread.sleep(1000);
             }
             driver.navigate().back();
             Thread.sleep(1000);
         }
 
         // Convert the ArrayList to JSON and store it in a file
-        String json = objectMapper.writeValueAsString(oscarData);
-        File outputFile = new File("output/oscar-winner-data.json");
-        outputFile.getParentFile().mkdirs();
-        FileWriter fileWriter = new FileWriter(outputFile);
-        fileWriter.write(json);
-        fileWriter.close();
-
+        File file = homePage.convetArrayListIntoJsonFile(oscarData, "oscar-winner-data.json");
         // Assert that the file is present and not empty
-        Assert.assertTrue(outputFile.exists());
-        Assert.assertTrue(outputFile.length() > 0);
+        Assert.assertTrue(file.exists());
+        Assert.assertTrue(file.length() > 0);
         System.out.println("JSON file created successfully!");
         System.out.println("TestCase02:End");
-
     }
 
     @AfterTest
